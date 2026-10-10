@@ -207,7 +207,7 @@ set_launch_option() {
             return 0
         fi
         say ""
-        say "To set Dark Souls II's launch option, Steam needs to close for a moment (it will reopen)."
+        say "To change Dark Souls II's launch option, Steam needs to close for a moment (it will reopen)."
         if ! confirm "Close Steam now?"; then
             manual_launch_option_help "$mode"
             return 0
