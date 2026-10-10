@@ -192,7 +192,7 @@ find_game_dir() {
     return 1
 }
 
-steam_running() { pgrep -x steam >/dev/null 2>&1 || pgrep -f 'ubuntu12_32/steam( |$)' >/dev/null 2>&1; }
+steam_running() { pgrep -x steam >/dev/null 2>&1; }
 
 # ---------------------------------------------------------------------------
 # Launch option (stored in userdata/<id>/config/localconfig.vdf; Steam must be
@@ -348,8 +348,27 @@ PY
 
     if [ "$restart" = 1 ]; then
         say "Reopening Steam..."
-        (setsid steam >/dev/null 2>&1 </dev/null &)
+        restart_steam
+        local i
+        for i in $(seq 1 30); do steam_running && break; sleep 1; done
+        steam_running || warn "Steam didn't reopen by itself - please start it from the desktop."
     fi
+}
+
+restart_steam() {
+    # If run from somewhere without the desktop's display variables (ssh, a service, ...),
+    # point Steam at the local desktop session so it can open its window.
+    local rt="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}" xa
+    if [ -z "${DISPLAY-}" ] && [ -z "${WAYLAND_DISPLAY-}" ]; then
+        [ -S /tmp/.X11-unix/X0 ] && export DISPLAY=:0
+        [ -S "$rt/wayland-0" ] && export WAYLAND_DISPLAY=wayland-0
+        if [ -z "${XAUTHORITY-}" ]; then
+            xa="$(find "$rt" -maxdepth 1 -name 'xauth_*' -print -quit 2>/dev/null)"
+            [ -n "$xa" ] && export XAUTHORITY="$xa"
+        fi
+        export XDG_RUNTIME_DIR="$rt"
+    fi
+    (setsid steam >/dev/null 2>&1 </dev/null &)
 }
 
 manual_launch_option_help() {
