@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Dark Souls II: Scholar of the First Sin - Seamless Co-op installer for Steam Deck / SteamOS / Linux.
 #
-#   curl -fsSL https://raw.githubusercontent.com/<you>/ds2-seamless-coop-installer/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/onetrickwolf/ds2-seamless-coop-installer/main/install.sh | bash
 #
 # Uninstall:
-#   curl -fsSL https://raw.githubusercontent.com/<you>/ds2-seamless-coop-installer/main/install.sh | bash -s -- --uninstall
+#   curl -fsSL https://raw.githubusercontent.com/onetrickwolf/ds2-seamless-coop-installer/main/install.sh | bash -s -- --uninstall
 #
 # The mod itself is NOT bundled here (the author does not allow redistribution);
 # it is downloaded from the GitHub release mirror at install time.

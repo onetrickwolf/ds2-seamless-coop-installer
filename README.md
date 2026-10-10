@@ -10,7 +10,7 @@ on a Steam Deck, Steam Machine, or any Linux PC running the game through Proton.
 3. Paste this and press Enter:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/OWNER/ds2-seamless-coop-installer/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/onetrickwolf/ds2-seamless-coop-installer/main/install.sh | bash
 ```
 
 It will:
@@ -32,7 +32,7 @@ Run the same command again. Your settings and password are kept.
 ## Uninstall
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/OWNER/ds2-seamless-coop-installer/main/install.sh | bash -s -- --uninstall
+curl -fsSL https://raw.githubusercontent.com/onetrickwolf/ds2-seamless-coop-installer/main/install.sh | bash -s -- --uninstall
 ```
 
 This removes the mod files and launch option. Co-op saves (`.co2`) are left alone.
