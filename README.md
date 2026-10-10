@@ -12,6 +12,12 @@ curl -fsSL https://raw.githubusercontent.com/onetrickwolf/ds2-seamless-coop-inst
 
 It downloads the latest release, asks for your co-op password, and sets the Steam launch option (Steam restarts briefly). Run it again to update.
 
+Everyone playing together needs the same password. To set it without being asked:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/onetrickwolf/ds2-seamless-coop-installer/main/install.sh | bash -s -- --password yourpassword
+```
+
 ## Uninstall
 
 ```bash
