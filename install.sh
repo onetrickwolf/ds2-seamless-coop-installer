@@ -198,23 +198,31 @@ steam_running() { pgrep -x steam >/dev/null 2>&1; }
 
 # Steam runs this instead of the game (via the launch option). It swaps DarkSoulsII.exe
 # for the mod's launcher. In Game Mode the game, when started by the launcher, sits on a
-# white screen until its window is clicked, so it also clicks the window once it appears.
+# white screen until it sees mouse input, so it also wiggles the pointer by a pixel until
+# the game has started (it starts its XInput thread once past the white screen).
 write_launch_script() {
     cat > "$GAME_DIR/SeamlessCoop/steam-launch.sh" <<'SH'
 #!/usr/bin/env bash
 # Written by ds2-seamless-coop-installer; used by Dark Souls II's Steam launch option.
+log="$(dirname "$0")/steam-launch.log"
 if [ "${XDG_CURRENT_DESKTOP-}" = gamescope ] && command -v xdotool >/dev/null; then
     (
+        echo "$(date +%T) waiting for the game window"
         for _ in $(seq 1 120); do
             sleep 1
-            win="$(xdotool search --name '^DARK SOULS II$' | head -n1)"
-            if [ -n "$win" ]; then
-                sleep 2
-                xdotool mousemove --window "$win" 1 1 click 1
+            pid="$(pgrep -x DarkSoulsII.exe | head -n1)"
+            [ -n "$pid" ] || continue
+            if grep -qx wine_xinput_hid /proc/"$pid"/task/*/comm 2>/dev/null; then
+                echo "$(date +%T) game started"
                 exit 0
             fi
+            if [ -n "$(xdotool search --name '^DARK SOULS II$')" ]; then
+                xdotool mousemove_relative -- 1 0
+                xdotool mousemove_relative -- -1 0
+            fi
         done
-    ) >/dev/null 2>&1 </dev/null &
+        echo "$(date +%T) gave up"
+    ) >"$log" 2>&1 </dev/null &
 fi
 exec "${@/DarkSoulsII.exe/ds2sc_launcher.exe}"
 SH

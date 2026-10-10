@@ -34,6 +34,6 @@ If setting it automatically fails, the installer prints the line to paste into S
 bash "/home/deck/.local/share/Steam/steamapps/common/Dark Souls II Scholar of the First Sin/Game/SeamlessCoop/steam-launch.sh" %command%
 ```
 
-In Game Mode this also clicks the game window once at startup; without it the game sits on a white screen until clicked.
+In Game Mode this also nudges the mouse by a pixel at startup until the game is running; without it the game sits on a white screen until the mouse moves.
 
 Run `install.sh --help` for other options.
