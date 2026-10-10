@@ -1,0 +1,4 @@
+name = "ds2-otw-gg"
+main = "worker.js"
+compatibility_date = "2026-08-01"
+routes = [{ pattern = "ds2.otw.gg", custom_domain = true }]
