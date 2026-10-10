@@ -7,21 +7,23 @@ Installs [Seamless Co-op](https://www.nexusmods.com/darksouls2/mods/1468) for Da
 In Desktop Mode, open Konsole and run:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/onetrickwolf/ds2-seamless-coop-installer/main/install.sh | bash
+curl -fsSL ds2.otw.gg | bash
 ```
 
 It downloads the latest release, asks for your co-op password, and sets the Steam launch option (Steam restarts briefly). Run it again to update.
 
+`ds2.otw.gg` is just a short address that serves `install.sh` from this repo.
+
 Everyone playing together needs the same password. To set it without being asked:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/onetrickwolf/ds2-seamless-coop-installer/main/install.sh | bash -s -- --password yourpassword
+curl -fsSL ds2.otw.gg | bash -s -- --password yourpassword
 ```
 
 ## Uninstall
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/onetrickwolf/ds2-seamless-coop-installer/main/install.sh | bash -s -- --uninstall
+curl -fsSL ds2.otw.gg | bash -s -- --uninstall
 ```
 
 Co-op saves are kept.
