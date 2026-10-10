@@ -132,6 +132,7 @@ do_install() {
     fi
     [ -n "$current" ] || warn "No co-op password set - you'll need one to host or join. Edit: $ini"
 
+    ensure_save_dir
     offer_save_copy
 
     if [ "$SET_LAUNCH_OPTION" = 1 ]; then
@@ -387,14 +388,42 @@ manual_launch_option_help() {
 is_gamescope() { [ "${XDG_CURRENT_DESKTOP-}" = gamescope ] || pgrep -x gamescope-wl >/dev/null 2>&1 && ! pgrep -x plasmashell >/dev/null 2>&1; }
 
 # ---------------------------------------------------------------------------
+# Saves live in the game's Proton prefix (compatdata), normally in the same library as the game.
+
+steamuser_dir() {
+    local c
+    for c in "$(readlink -f "$GAME_DIR/../../..")/compatdata/$APP_ID" "$STEAM_ROOT/steamapps/compatdata/$APP_ID"; do
+        if [ -d "$c/pfx/drive_c/users/steamuser" ]; then
+            echo "$c/pfx/drive_c/users/steamuser"
+            return 0
+        fi
+    done
+    return 1
+}
+
+# The mod crashes on startup (std::filesystem error) if the game's save folder
+# doesn't exist yet, which is the case until the unmodded game has run once.
+ensure_save_dir() {
+    local user id
+    if ! user="$(steamuser_dir)"; then
+        warn "Dark Souls II hasn't been started on this machine yet."
+        warn "Launch it once from Steam (it may close straight away), then run this installer again."
+        return 0
+    fi
+    for id in "$STEAM_ROOT"/userdata/*/; do
+        id="$(basename "$id")"
+        case "$id" in ''|0|*[!0-9]*) continue ;; esac
+        mkdir -p "$user/AppData/Roaming/DarkSoulsII/$(printf '%016x' $((0x0110000100000000 + id)))"
+    done
+}
+
+# ---------------------------------------------------------------------------
 # Optional: start co-op with a copy of the existing vanilla save.
 
 offer_save_copy() {
-    local base="$STEAM_ROOT/steamapps/compatdata/$APP_ID/pfx/drive_c/users/steamuser/AppData/Roaming/DarkSoulsII"
-    # compatdata lives in the same library as the game
-    local lib_compat
-    lib_compat="$(readlink -f "$GAME_DIR/../../..")/compatdata/$APP_ID/pfx/drive_c/users/steamuser/AppData/Roaming/DarkSoulsII"
-    [ -d "$lib_compat" ] && base="$lib_compat"
+    local user base
+    user="$(steamuser_dir)" || return 0
+    base="$user/AppData/Roaming/DarkSoulsII"
     [ -d "$base" ] || return 0
 
     local ext sl2 co2
