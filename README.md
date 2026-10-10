@@ -1,4 +1,4 @@
-# Dark Souls II Seamless Co-op — one-command installer for Steam Deck / SteamOS
+# Dark Souls II Seamless Co-op: one-command installer for Steam Deck / SteamOS
 
 Installs [Seamless Co-op for Dark Souls II: Scholar of the First Sin](https://www.nexusmods.com/darksouls2/mods/1468)
 on a Steam Deck, Steam Machine, or any Linux PC running the game through Proton.
