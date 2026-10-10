@@ -28,10 +28,12 @@ Co-op saves are kept.
 
 ## Manual launch option
 
-If setting it automatically fails, paste this into Steam → Properties → Launch Options:
+If setting it automatically fails, the installer prints the line to paste into Steam → Properties → Launch Options. For the default install location it's:
 
 ```
-bash -c 'exec "${@/DarkSoulsII.exe/ds2sc_launcher.exe}"' -- %command%
+bash "/home/deck/.local/share/Steam/steamapps/common/Dark Souls II Scholar of the First Sin/Game/SeamlessCoop/steam-launch.sh" %command%
 ```
+
+In Game Mode this also clicks the game window once at startup; without it the game sits on a white screen until clicked.
 
 Run `install.sh --help` for other options.

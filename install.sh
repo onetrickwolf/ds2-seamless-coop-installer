@@ -16,7 +16,6 @@ set -euo pipefail
 APP_ID=335300
 MOD_REPO="${DS2SC_REPO:-yuiamoroll/DarkSouls2SeamlessCoopRelease}"
 MOD_VERSION="${DS2SC_VERSION:-latest}"
-WRAPPER="bash -c 'exec \"\${@/DarkSoulsII.exe/ds2sc_launcher.exe}\"' --"
 
 ACTION=install
 ASSUME_YES=0
@@ -56,6 +55,7 @@ GAME_DIR="${DS2SC_GAME_DIR:-$(find_game_dir "$STEAM_ROOT")}" \
     || die "Couldn't find Dark Souls II: Scholar of the First Sin. Install it in Steam first."
 [ -f "$GAME_DIR/DarkSoulsII.exe" ] || die "DarkSoulsII.exe not found in: $GAME_DIR"
 ok "Found the game: $GAME_DIR"
+WRAPPER="bash \"$GAME_DIR/SeamlessCoop/steam-launch.sh\""
 
 if [ "$ACTION" = uninstall ]; then
     do_uninstall
@@ -105,6 +105,7 @@ do_install() {
     mkdir -p "$GAME_DIR/SeamlessCoop"
     cp -rf "$src/SeamlessCoop/." "$GAME_DIR/SeamlessCoop/"
     echo "$tag" > "$GAME_DIR/SeamlessCoop/.installed-version"
+    write_launch_script
 
     if [ -n "$old_ini" ]; then
         ini_merge "$old_ini" "$ini"
@@ -195,6 +196,31 @@ find_game_dir() {
 
 steam_running() { pgrep -x steam >/dev/null 2>&1; }
 
+# Steam runs this instead of the game (via the launch option). It swaps DarkSoulsII.exe
+# for the mod's launcher. In Game Mode the game, when started by the launcher, sits on a
+# white screen until its window is clicked, so it also clicks the window once it appears.
+write_launch_script() {
+    cat > "$GAME_DIR/SeamlessCoop/steam-launch.sh" <<'SH'
+#!/usr/bin/env bash
+# Written by ds2-seamless-coop-installer; used by Dark Souls II's Steam launch option.
+if [ "${XDG_CURRENT_DESKTOP-}" = gamescope ] && command -v xdotool >/dev/null; then
+    (
+        for _ in $(seq 1 120); do
+            sleep 1
+            win="$(xdotool search --name '^DARK SOULS II$' | head -n1)"
+            if [ -n "$win" ]; then
+                sleep 2
+                xdotool mousemove --window "$win" 1 1 click 1
+                exit 0
+            fi
+        done
+    ) >/dev/null 2>&1 </dev/null &
+fi
+exec "${@/DarkSoulsII.exe/ds2sc_launcher.exe}"
+SH
+    chmod +x "$GAME_DIR/SeamlessCoop/steam-launch.sh"
+}
+
 # ---------------------------------------------------------------------------
 # Launch option (stored in userdata/<id>/config/localconfig.vdf; Steam must be
 # closed while we edit it or it will overwrite our change on exit).
@@ -231,6 +257,8 @@ set_launch_option() {
         cp "$f" "$f.ds2sc-backup"
         if python3 -I - "$f" "$APP_ID" "$mode" "$WRAPPER" <<'PY'
 import sys
+
+import re
 
 path, app_id, mode, wrapper = sys.argv[1:5]
 
@@ -305,21 +333,24 @@ if node is None:
 entry = next((kv for kv in node if kv[0] == "LaunchOptions"), None)
 current = entry[1] if entry else ""
 
+# Any wrapper this installer has ever written (older versions used an inline bash -c).
+ours = re.compile(r"""bash -c 'exec "\$\{@/DarkSoulsII\.exe/ds2sc_launcher\.exe\}"' -- ?"""
+                  r"""|bash "[^"]*/SeamlessCoop/steam-launch\.sh" ?""")
+base = ours.sub("", current).strip()
+if base == "%command%":
+    base = ""
+
 if mode == "add":
-    if wrapper in current:
-        sys.exit(3)
-    if "%command%" in current:
-        new = current.replace("%command%", wrapper + " %command%", 1)
-    elif current.strip():
-        new = f"{wrapper} %command% {current.strip()}"
+    if "%command%" in base:
+        new = base.replace("%command%", wrapper + " %command%", 1)
+    elif base:
+        new = f"{wrapper} %command% {base}"
     else:
         new = f"{wrapper} %command%"
 else:
-    if wrapper not in current:
-        sys.exit(3)
-    new = current.replace(wrapper + " ", "").replace(wrapper, "")
-    if new.strip() == "%command%":
-        new = ""
+    new = base
+if new == current:
+    sys.exit(3)
 
 if entry:
     entry[1] = new
